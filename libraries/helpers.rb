@@ -32,7 +32,23 @@ module Gpg
     end
 
     def gpg2_packages
-      platform_family?('suse') ? %w(haveged gpg2) : %w(haveged gnupg2)
+      case node['platform_family']
+      when 'suse'
+        %w(haveged gpg2)
+      when 'amazon'
+        if node['platform_version'].to_i >= 2023
+          %w(haveged)
+        else
+          %w(haveged gnupg2)
+        end
+      else
+        %w(haveged gnupg2)
+      end
     end
   end
 end
+
+# package
+# gnupg2-minimal-2.3.7-1.amzn2023.0.4.aarch64 conflicts with
+# gnupg2 provided by
+# gnupg2-2.3.7-1.amzn2023.0.4.aarch64

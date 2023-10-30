@@ -62,7 +62,8 @@ property :key_file, String,
          description: 'Keyfile name'
 
 property :key_fingerprint, [String, Array],
-         description: 'Key finger print. Used to identify when deleting keys using the :delete action'
+         description: 'Key finger print. Used to identify when deleting keys using the :delete action',
+         coerce: proc { |x| Array(x) }
 
 # Only Ubuntu > 16.04 supports the pinetree_mode. And requires it
 property :pinentry_mode, [String, FalseClass],
@@ -130,6 +131,8 @@ end
 
 action :import do
   Array(new_resource.key_fingerprint).each do |key|
+    package 'dirmngr'
+
     # If a keyserver is specified, use that to import the key
     if new_resource.keyserver
       cmd = "#{gpg_cmd} --keyserver #{new_resource.keyserver} --recv-keys #{key}"
